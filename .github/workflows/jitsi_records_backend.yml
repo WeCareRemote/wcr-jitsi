@@ -51,7 +51,22 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -f ${{ env.DOCKERFILE_PATH }} -t ${{ env.SERVICE_NAME }}:${{ github.event.inputs.tag }} ${{ env.BUILD_CONTEXT }}
+          docker build -f ${{ env.DOCKERFILE_PATH }} \
+          -t ${{ env.SERVICE_NAME }}:${{ github.event.inputs.tag }} ${{ env.BUILD_CONTEXT }} \
+          --build-arg AWS_ACCESS_KEY_ID='${{ secrets.AWS_ACCESS_KEY_ID }}' \
+          --build-arg AWS_SECRET_ACCESS_KEY='${{ secrets.AWS_SECRET_ACCESS_KEY }}' \
+          --build-arg DB_HOST='${{ secrets.DB_HOST }}' \
+          --build-arg DB_DATABASE='${{ secrets.DB_DATABASE }}' \
+          --build-arg DB_PASSWORD='${{ secrets.DB_PASSWORD }}' \
+          --build-arg DB_USERNAME='${{ secrets.DB_USERNAME }}' \
+          --build-arg DB_PORT='${{ secrets.DB_PORT }}' \
+          --build-arg STORAGE_HOST='${{ secrets.STORAGE_HOST }}' \
+          --build-arg GREYT_HOST='${{ secrets.GREYT_HOST }}' \
+          --build-arg APP_MODULE='${{ secrets.APP_MODULE }}' \
+          --build-arg RECORDS_DIR='${{ secrets.RECORDS_DIR }}' \
+          --build-arg APP_MODE='${{ secrets.APP_MODE }}' \
+          --build-arg RECORDS_HANDLER_TOKEN='${{ secrets.RECORDS_HANDLER_TOKEN }}' \
+          --build-arg S3_BUCKET='${{ secrets.S3_BUCKET }}'
           docker tag ${{ env.SERVICE_NAME }}:${{ github.event.inputs.tag }} ${{ env.ECR_URL }}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.tag }}
           docker push ${{ env.ECR_URL }}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.tag }}
 
