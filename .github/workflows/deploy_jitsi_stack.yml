@@ -89,4 +89,4 @@ jobs:
             TZ='${{ secrets.TZ }}' \
             JITSI='${{ env.ECR_URL }}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.tag }}' \
             docker compose --profile ${{ github.event.inputs.environment }} up -d --build
-          EOF
+            EOF
