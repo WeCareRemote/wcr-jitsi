@@ -1,0 +1,90 @@
+name: "Jitsi Records Backend CI"
+run-name: >
+  ${{ format('Deploy Jitsi Records Backend to {0} environment', github.event.inputs.environment) }}
+on: 
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: environment
+        description: "Target deployment environment"
+        required: true
+        default: dev
+      tag:
+        type: string
+        description: "Docker image tag"
+        required: true
+        default: latest
+      region:
+        type: string
+        description: "AWS region"
+        required: true
+        default: "eu-central-1"
+
+env:
+  SERVICE_NAME: jitsi_records_backend
+  CONTAINER_NAME: jitsi-records-backend
+  APP_PATH: /opt/greyt
+  ECR_URL: "${{ secrets.ACCOUNT_ID }}.dkr.ecr.${{ github.event.inputs.region }}.amazonaws.com"
+  CONTAINER_REGISTRY: "ecr-jitsi"
+  DOCKERFILE_PATH: "jitsi_records_backend/docker/Dockerfile"
+  BUILD_CONTEXT: "jitsi_records_backend"
+
+jobs:
+  build:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: AWS login
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.SECRET_KEY }}
+          aws-region: ${{ github.event.inputs.region }}
+
+      - name: Docker login to ECR
+        run: |
+          aws ecr get-login-password --region ${{ github.event.inputs.region }} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}
+
+      - name: Build and push Docker image
+        run: |
+          docker build -f ${{ env.DOCKERFILE_PATH }} -t ${{ env.SERVICE_NAME }}:${{ github.event.inputs.tag }} ${{ env.BUILD_CONTEXT }}
+          docker tag ${{ env.SERVICE_NAME }}:${{ github.event.inputs.tag }} ${{ env.ECR_URL }}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.tag }}
+          docker push ${{ env.ECR_URL }}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.tag }}
+
+  deploy:
+    name: Deploy jitsi_records_backend Only
+    runs-on: ubuntu-latest
+    needs: build
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Install SSH client
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y openssh-client
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan ${{ secrets.SSH_IP }} >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy service on server
+        run: |
+          eval $(ssh-agent -s)
+          echo "${{ secrets.SSH_KEY }}" | tr -d '\r' | ssh-add -
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} <<EOF
+          set -e
+          cd ${{ env.APP_PATH }}/jibri-stack
+          aws ecr get-login-password --region ${{ github.event.inputs.region }} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}
+          sed -i "s|^JITSI=.*|JITSI=${{ env.ECR_URL }}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.tag }}|g" ../.env
+          docker stop ${{ env.CONTAINER_NAME }} || true
+          docker rm ${{ env.CONTAINER_NAME }} || true
+          docker compose --env-file ../.env --profile ${{ github.event.inputs.environment }} pull ${{ env.SERVICE_NAME }}
+          docker compose --env-file ../.env --profile ${{ github.event.inputs.environment }} up -d ${{ env.SERVICE_NAME }}
+          docker image prune -f
+          EOF
