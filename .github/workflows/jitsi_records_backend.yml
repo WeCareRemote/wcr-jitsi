@@ -93,13 +93,13 @@ jobs:
           eval $(ssh-agent -s)
           echo "${{ secrets.SSH_KEY }}" | tr -d '\r' | ssh-add -
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} <<EOF
-          set -e
-          cd ${{ env.APP_PATH }}/jibri-stack
-          aws ecr get-login-password --region ${{ github.event.inputs.region }} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}
-          sed -i "s|^JITSI=.*|JITSI=${{ env.ECR_URL }}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.tag }}|g" ../.env
-          docker stop ${{ env.CONTAINER_NAME }} || true
-          docker rm ${{ env.CONTAINER_NAME }} || true
-          docker compose --env-file ../.env --profile ${{ github.event.inputs.environment }} pull ${{ env.SERVICE_NAME }}
-          docker compose --env-file ../.env --profile ${{ github.event.inputs.environment }} up -d ${{ env.SERVICE_NAME }}
-          docker image prune -f
-          EOF
+            set -e
+            cd ${{ env.APP_PATH }}/jibri-stack
+            aws ecr get-login-password --region ${{ github.event.inputs.region }} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}
+            sed -i "s|^JITSI=.*|JITSI=${{ env.ECR_URL }}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.tag }}|g" ../.env
+            docker stop ${{ env.CONTAINER_NAME }} || true
+            docker rm ${{ env.CONTAINER_NAME }} || true
+            docker compose --env-file ../.env --profile ${{ github.event.inputs.environment }} pull ${{ env.SERVICE_NAME }}
+            docker compose --env-file ../.env --profile ${{ github.event.inputs.environment }} up -d ${{ env.SERVICE_NAME }}
+            docker image prune -f
+            EOF
