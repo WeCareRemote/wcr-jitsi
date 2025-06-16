@@ -1,0 +1,51 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+*venv/
+.env
+*.env
+
+# IDEs and editors
+.idea/
+.vscode/
+
+# Pytest / test-related
+.pytest_cache/
+test_records_dir*
+
+# mypy
+.mypy_cache/
+.dmypy.json
+
+# coverage reports
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+.cache
+
+# PyInstaller
+dist/
+build/
+*.spec
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# macOS and system files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Pydantic v2 compiled models (if enabled)
+__pydantic__/ 
+
+# Local SQLite or other temp DBs
+*.sqlite3
+*.db
