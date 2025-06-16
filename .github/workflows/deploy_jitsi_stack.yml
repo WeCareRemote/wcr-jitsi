@@ -63,7 +63,7 @@ jobs:
           set -e
           cd ${{ env.STACK_PATH }}
           aws ecr get-login-password --region ${{ github.event.inputs.region }} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}
-          docker compose --env-file ../.env down
+          docker compose --env-file ../.env --profile ${{ github.event.inputs.environment }} down
           sed -i "s|^JITSI=.*|JITSI=${{ env.ECR_URL }}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.tag }}|g" ../.env
           XMPP_DOMAIN='${{ secrets.XMPP_DOMAIN }}' \
           XMPP_AUTH_DOMAIN='${{ secrets.XMPP_AUTH_DOMAIN }}' \
