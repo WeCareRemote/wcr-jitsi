@@ -59,34 +59,34 @@ jobs:
         run: |
           eval $(ssh-agent -s)
           echo "${{ secrets.SSH_KEY }}" | tr -d '\r' | ssh-add -
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} <<EOF
-            set -e
-            cd ${{ env.STACK_PATH }}
-            aws ecr get-login-password --region ${{ github.event.inputs.region }} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}
-            docker compose --env-file ../.env down
-            sed -i "s|^JITSI=.*|JITSI=${{ env.ECR_URL }}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.tag }}|g" ../.env
-            XMPP_DOMAIN='${{ secrets.XMPP_DOMAIN }}' \
-            XMPP_AUTH_DOMAIN='${{ secrets.XMPP_AUTH_DOMAIN }}' \
-            XMPP_INTERNAL_MUC_DOMAIN='${{ secrets.XMPP_INTERNAL_MUC_DOMAIN }}' \
-            XMPP_RECORDER_DOMAIN='${{ secrets.XMPP_RECORDER_DOMAIN }}' \
-            XMPP_SERVER='${{ secrets.XMPP_SERVER }}' \
-            JICOFO_AUTH_USER='${{ secrets.JICOFO_AUTH_USER }}' \
-            JICOFO_AUTH_PASSWORD='${{ secrets.JICOFO_AUTH_PASSWORD }}' \
-            JICOFO_COMPONENT_SECRET='${{ secrets.JICOFO_COMPONENT_SECRET }}' \
-            JVB_AUTH_USER='${{ secrets.JVB_AUTH_USER }}' \
-            JVB_AUTH_PASSWORD='${{ secrets.JVB_AUTH_PASSWORD }}' \
-            JVB_BREWERY_MUC='${{ secrets.JVB_BREWERY_MUC }}' \
-            JIBRI_XMPP_USER='${{ secrets.JIBRI_XMPP_USER }}' \
-            JIBRI_XMPP_PASSWORD='${{ secrets.JIBRI_XMPP_PASSWORD }}' \
-            JIBRI_BREWERY_MUC='${{ secrets.JIBRI_BREWERY_MUC }}' \
-            JIBRI_RECORDER_USER='${{ secrets.JIBRI_RECORDER_USER }}' \
-            JIBRI_RECORDER_PASSWORD='${{ secrets.JIBRI_RECORDER_PASSWORD }}' \
-            JIBRI_RECORDING_DIR='${{ secrets.JIBRI_RECORDING_DIR }}' \
-            JIBRI_FINALIZE_RECORDING_SCRIPT_PATH='${{ secrets.JIBRI_FINALIZE_RECORDING_SCRIPT_PATH }}' \
-            RECORDS_TOKEN='${{ secrets.RECORDS_HANDLER_TOKEN }}' \
-            JIBRI_LOGS_DIR='${{ secrets.JIBRI_LOGS_DIR }}' \
-            DISPLAY='${{ secrets.DISPLAY }}' \
-            TZ='${{ secrets.TZ }}' \
-            JITSI='${{ env.ECR_URL }}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.tag }}' \
-            docker compose --profile ${{ github.event.inputs.environment }} up -d --build
-            EOF
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} <<'EOF'
+          set -e
+          cd ${{ env.STACK_PATH }}
+          aws ecr get-login-password --region ${{ github.event.inputs.region }} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}
+          docker compose --env-file ../.env down
+          sed -i "s|^JITSI=.*|JITSI=${{ env.ECR_URL }}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.tag }}|g" ../.env
+          XMPP_DOMAIN='${{ secrets.XMPP_DOMAIN }}' \
+          XMPP_AUTH_DOMAIN='${{ secrets.XMPP_AUTH_DOMAIN }}' \
+          XMPP_INTERNAL_MUC_DOMAIN='${{ secrets.XMPP_INTERNAL_MUC_DOMAIN }}' \
+          XMPP_RECORDER_DOMAIN='${{ secrets.XMPP_RECORDER_DOMAIN }}' \
+          XMPP_SERVER='${{ secrets.XMPP_SERVER }}' \
+          JICOFO_AUTH_USER='${{ secrets.JICOFO_AUTH_USER }}' \
+          JICOFO_AUTH_PASSWORD='${{ secrets.JICOFO_AUTH_PASSWORD }}' \
+          JICOFO_COMPONENT_SECRET='${{ secrets.JICOFO_COMPONENT_SECRET }}' \
+          JVB_AUTH_USER='${{ secrets.JVB_AUTH_USER }}' \
+          JVB_AUTH_PASSWORD='${{ secrets.JVB_AUTH_PASSWORD }}' \
+          JVB_BREWERY_MUC='${{ secrets.JVB_BREWERY_MUC }}' \
+          JIBRI_XMPP_USER='${{ secrets.JIBRI_XMPP_USER }}' \
+          JIBRI_XMPP_PASSWORD='${{ secrets.JIBRI_XMPP_PASSWORD }}' \
+          JIBRI_BREWERY_MUC='${{ secrets.JIBRI_BREWERY_MUC }}' \
+          JIBRI_RECORDER_USER='${{ secrets.JIBRI_RECORDER_USER }}' \
+          JIBRI_RECORDER_PASSWORD='${{ secrets.JIBRI_RECORDER_PASSWORD }}' \
+          JIBRI_RECORDING_DIR='${{ secrets.JIBRI_RECORDING_DIR }}' \
+          JIBRI_FINALIZE_RECORDING_SCRIPT_PATH='${{ secrets.JIBRI_FINALIZE_RECORDING_SCRIPT_PATH }}' \
+          RECORDS_TOKEN='${{ secrets.RECORDS_HANDLER_TOKEN }}' \
+          JIBRI_LOGS_DIR='${{ secrets.JIBRI_LOGS_DIR }}' \
+          DISPLAY='${{ secrets.DISPLAY }}' \
+          TZ='${{ secrets.TZ }}' \
+          JITSI='${{ env.ECR_URL }}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.tag }}' \
+          docker compose --profile ${{ github.event.inputs.environment }} up -d --build
+          EOF
