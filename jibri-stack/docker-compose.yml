@@ -111,6 +111,23 @@ services:
     volumes:
       - jibri_recordings:/jibri_records
 
+  web:
+    profiles: ["dev"]
+    image: jitsi/web:stable
+    container_name: jitsi-web
+    restart: always
+    depends_on:
+      - prosody
+    ports:
+      - "8088:80"
+    environment:
+      - ENABLE_LETSENCRYPT=0
+      - XMPP_DOMAIN
+      - XMPP_AUTH_DOMAIN
+      - XMPP_BOSH_URL_BASE
+      - XMPP_GUEST_DOMAIN
+      - TZ
+
 volumes:
   jibri_recordings:
   jibri_logs:
