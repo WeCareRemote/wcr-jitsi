@@ -82,6 +82,14 @@ jobs:
           JIBRI_XMPP_PASSWORD='${{ secrets.JIBRI_XMPP_PASSWORD }}' \
           JIBRI_BREWERY_MUC='${{ secrets.JIBRI_BREWERY_MUC }}' \
           JIBRI_RECORDER_USER='${{ secrets.JIBRI_RECORDER_USER }}' \
+          DOCKER_HOST_ADDRESS='${{ secrets.DOCKER_HOST_ADDRESS }}' \
+          JVB_ADVERTISE_IPS='${{ secrets.JVB_ADVERTISE_IPS }}' \
+          COLIBRI_WS_DOMAIN='${{ secrets.COLIBRI_WS_DOMAIN }}' \
+          COLIBRI_WS_SERVER_ID='default-id' \
+          ENABLE_COLIBRI_WEBSOCKET='1' \
+          PUBLIC_URL='${{ secrets.PUBLIC_URL }}' \
+          ENABLE_XMPP_WEBSOCKET='1' \
+          XMPP_WEBSOCKET_URL='${{ secrets.XMPP_WEBSOCKET_URL }}' \
           JIBRI_RECORDER_PASSWORD='${{ secrets.JIBRI_RECORDER_PASSWORD }}' \
           JIBRI_RECORDING_DIR='${{ secrets.JIBRI_RECORDING_DIR }}' \
           JIBRI_FINALIZE_RECORDING_SCRIPT_PATH='${{ secrets.JIBRI_FINALIZE_RECORDING_SCRIPT_PATH }}' \
