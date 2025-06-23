@@ -63,6 +63,7 @@ services:
       - JVB_AUTH_USER
       - JVB_AUTH_PASSWORD
       - JVB_BREWERY_MUC
+      - JVB_ADVERTISE_IPS
       - TZ
 
   jibri:
