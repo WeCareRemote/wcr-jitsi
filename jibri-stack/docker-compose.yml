@@ -54,6 +54,7 @@ services:
       - prosody
     ports:
       - "10000:10000/udp"
+      - "9090:9090"
     environment:
       - DOCKER_HOST_ADDRESS
       - XMPP_DOMAIN
@@ -64,6 +65,7 @@ services:
       - JVB_AUTH_PASSWORD
       - JVB_BREWERY_MUC
       - JVB_ADVERTISE_IPS
+      - JVB_ENABLE_APIS=rest,colibri
       - TZ
 
   jibri:
