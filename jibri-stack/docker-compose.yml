@@ -66,6 +66,8 @@ services:
       - JVB_BREWERY_MUC
       - JVB_ADVERTISE_IPS
       - JVB_ENABLE_APIS=rest,colibri
+      - COLIBRI_WS_DOMAIN
+      - ENABLE_COLIBRI_WEBSOCKET=1
       - TZ
 
   jibri:
@@ -138,6 +140,7 @@ services:
       - XMPP_WEBSOCKET_URL
       - TZ
       - ENABLE_GUESTS=1
+      - ENABLE_COLIBRI_WEBSOCKET=1
 volumes:
   jibri_recordings:
   jibri_logs:
