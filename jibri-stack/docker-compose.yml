@@ -52,6 +52,7 @@ services:
     ports:
       - "10000:10000/udp"
     environment:
+      - DOCKER_HOST_ADDRESS
       - XMPP_DOMAIN
       - XMPP_AUTH_DOMAIN
       - XMPP_INTERNAL_MUC_DOMAIN
@@ -121,13 +122,15 @@ services:
     ports:
       - "8088:80"
     environment:
-      - ENABLE_LETSENCRYPT=0
+      - PUBLIC_URL
+      - DOCKER_HOST_ADDRESS
       - XMPP_DOMAIN
       - XMPP_AUTH_DOMAIN
-      - XMPP_BOSH_URL_BASE
       - XMPP_GUEST_DOMAIN
+      - XMPP_BOSH_URL_BASE
+      - ENABLE_XMPP_WEBSOCKET
+      - XMPP_WEBSOCKET_URL
       - TZ
-
 volumes:
   jibri_recordings:
   jibri_logs:
