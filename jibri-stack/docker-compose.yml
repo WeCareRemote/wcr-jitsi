@@ -67,6 +67,7 @@ services:
       - JVB_ADVERTISE_IPS
       - JVB_ENABLE_APIS=rest,colibri
       - COLIBRI_WS_DOMAIN
+      - COLIBRI_WS_SERVER_ID=default-id
       - ENABLE_COLIBRI_WEBSOCKET=1
       - TZ
 
