@@ -1,0 +1,147 @@
+version: '3.8'
+
+services:
+  prosody:
+    profiles: ["dev"]
+    image: jitsi/prosody:stable
+    container_name: prosody
+    restart: always
+    ports:
+      - "5222:5222"
+      - "5347:5347"
+      - "5280:5280"
+    environment:
+      - XMPP_DOMAIN
+      - XMPP_AUTH_DOMAIN
+      - XMPP_INTERNAL_MUC_DOMAIN
+      - XMPP_RECORDER_DOMAIN
+      - XMPP_GUEST_DOMAIN
+      - JICOFO_AUTH_USER
+      - JICOFO_AUTH_PASSWORD
+      - JVB_AUTH_USER
+      - JVB_AUTH_PASSWORD
+      - JIBRI_XMPP_USER
+      - JIBRI_XMPP_PASSWORD
+      - JIBRI_RECORDER_USER
+      - JIBRI_RECORDER_PASSWORD
+      - TZ
+      - ENABLE_GUESTS=1 
+
+  jicofo:
+    profiles: ["dev"]
+    image: jitsi/jicofo:stable
+    container_name: jicofo
+    restart: always
+    depends_on:
+      - prosody
+    environment:
+      - XMPP_DOMAIN
+      - XMPP_AUTH_DOMAIN
+      - XMPP_INTERNAL_MUC_DOMAIN
+      - XMPP_SERVER
+      - JICOFO_COMPONENT_SECRET
+      - JICOFO_AUTH_USER
+      - JICOFO_AUTH_PASSWORD
+      - TZ
+      - ENABLE_GUESTS=1
+
+  jvb:
+    profiles: ["dev"]
+    image: jitsi/jvb:stable
+    container_name: jvb
+    restart: always
+    depends_on:
+      - prosody
+    ports:
+      - "10000:10000/udp"
+      - "9090:9090"
+    environment:
+      - DOCKER_HOST_ADDRESS
+      - XMPP_DOMAIN
+      - XMPP_AUTH_DOMAIN
+      - XMPP_INTERNAL_MUC_DOMAIN
+      - XMPP_SERVER
+      - JVB_AUTH_USER
+      - JVB_AUTH_PASSWORD
+      - JVB_BREWERY_MUC
+      - JVB_ADVERTISE_IPS
+      - JVB_ENABLE_APIS=rest,colibri
+      - COLIBRI_WS_DOMAIN
+      - COLIBRI_WS_SERVER_ID=default-id
+      - ENABLE_COLIBRI_WEBSOCKET=1
+      - TZ
+
+  jibri:
+    profiles: ["dev"]
+    image: jitsi/jibri:unstable
+    container_name: jibri
+    restart: always
+    shm_size: '2gb'
+    depends_on:
+      - prosody
+      - jicofo
+      - jvb
+    cap_add:
+      - SYS_ADMIN
+      - NET_BIND_SERVICE
+    ports:
+      - "2222:2222"
+    volumes:
+      - jibri_recordings:/config/recordings
+      - jibri_logs:/config/logs
+      - ./jibri/records_handler.sh:/home/jibri/records_handler.sh
+      - ./recordings:/config/recordings
+    environment:
+      - XMPP_DOMAIN
+      - XMPP_AUTH_DOMAIN
+      - XMPP_INTERNAL_MUC_DOMAIN
+      - XMPP_RECORDER_DOMAIN
+      - XMPP_SERVER
+      - JIBRI_XMPP_USER
+      - JIBRI_XMPP_PASSWORD
+      - JIBRI_BREWERY_MUC
+      - JIBRI_RECORDER_USER
+      - JIBRI_RECORDER_PASSWORD
+      - JIBRI_RECORDING_DIR
+      - JIBRI_FINALIZE_RECORDING_SCRIPT_PATH
+      - RECORDS_TOKEN
+      - JIBRI_LOGS_DIR
+      - DISPLAY
+      - TZ
+
+  jitsi_records_backend:
+    profiles: ["dev"]
+    image: "${JITSI}"
+    container_name: jitsi-records-backend
+    restart: always
+    depends_on:
+      - jibri
+    ports:
+      - "8001:80"
+    volumes:
+      - jibri_recordings:/jibri_records
+
+  web:
+    profiles: ["dev"]
+    image: jitsi/web:stable
+    container_name: jitsi-web
+    restart: always
+    depends_on:
+      - prosody
+    ports:
+      - "8088:80"
+    environment:
+      - PUBLIC_URL
+      - DOCKER_HOST_ADDRESS
+      - XMPP_DOMAIN
+      - XMPP_AUTH_DOMAIN
+      - XMPP_GUEST_DOMAIN
+      - XMPP_BOSH_URL_BASE
+      - ENABLE_XMPP_WEBSOCKET
+      - XMPP_WEBSOCKET_URL
+      - TZ
+      - ENABLE_GUESTS=1
+      - ENABLE_COLIBRI_WEBSOCKET=1
+volumes:
+  jibri_recordings:
+  jibri_logs:

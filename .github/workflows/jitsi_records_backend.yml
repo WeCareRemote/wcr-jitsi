@@ -51,7 +51,22 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -f ${{ env.DOCKERFILE_PATH }} -t ${{ env.SERVICE_NAME }}:${{ github.event.inputs.tag }} ${{ env.BUILD_CONTEXT }}
+          docker build -f ${{ env.DOCKERFILE_PATH }} \
+          -t ${{ env.SERVICE_NAME }}:${{ github.event.inputs.tag }} ${{ env.BUILD_CONTEXT }} \
+          --build-arg AWS_ACCESS_KEY_ID='${{ secrets.AWS_ACCESS_KEY_ID }}' \
+          --build-arg AWS_SECRET_ACCESS_KEY='${{ secrets.AWS_SECRET_ACCESS_KEY }}' \
+          --build-arg DB_HOST='${{ secrets.DB_HOST }}' \
+          --build-arg DB_DATABASE='${{ secrets.DB_DATABASE }}' \
+          --build-arg DB_PASSWORD='${{ secrets.DB_PASSWORD }}' \
+          --build-arg DB_USERNAME='${{ secrets.DB_USERNAME }}' \
+          --build-arg DB_PORT='${{ secrets.DB_PORT }}' \
+          --build-arg STORAGE_HOST='${{ secrets.STORAGE_HOST }}' \
+          --build-arg GREYT_HOST='${{ secrets.GREYT_HOST }}' \
+          --build-arg APP_MODULE='${{ secrets.APP_MODULE }}' \
+          --build-arg RECORDS_DIR='${{ secrets.RECORDS_DIR }}' \
+          --build-arg APP_MODE='${{ secrets.APP_MODE }}' \
+          --build-arg RECORDS_HANDLER_TOKEN='${{ secrets.RECORDS_HANDLER_TOKEN }}' \
+          --build-arg S3_BUCKET='${{ secrets.S3_BUCKET }}'
           docker tag ${{ env.SERVICE_NAME }}:${{ github.event.inputs.tag }} ${{ env.ECR_URL }}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.tag }}
           docker push ${{ env.ECR_URL }}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.tag }}
 
@@ -78,13 +93,13 @@ jobs:
           eval $(ssh-agent -s)
           echo "${{ secrets.SSH_KEY }}" | tr -d '\r' | ssh-add -
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} <<EOF
-          set -e
-          cd ${{ env.APP_PATH }}/jibri-stack
-          aws ecr get-login-password --region ${{ github.event.inputs.region }} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}
-          sed -i "s|^JITSI=.*|JITSI=${{ env.ECR_URL }}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.tag }}|g" ../.env
-          docker stop ${{ env.CONTAINER_NAME }} || true
-          docker rm ${{ env.CONTAINER_NAME }} || true
-          docker compose --env-file ../.env --profile ${{ github.event.inputs.environment }} pull ${{ env.SERVICE_NAME }}
-          docker compose --env-file ../.env --profile ${{ github.event.inputs.environment }} up -d ${{ env.SERVICE_NAME }}
-          docker image prune -f
-          EOF
+            set -e
+            cd ${{ env.APP_PATH }}/jibri-stack
+            aws ecr get-login-password --region ${{ github.event.inputs.region }} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}
+            sed -i "s|^JITSI=.*|JITSI=${{ env.ECR_URL }}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.tag }}|g" ../.env
+            docker stop ${{ env.CONTAINER_NAME }} || true
+            docker rm ${{ env.CONTAINER_NAME }} || true
+            docker compose --env-file ../.env --profile ${{ github.event.inputs.environment }} pull ${{ env.SERVICE_NAME }}
+            docker compose --env-file ../.env --profile ${{ github.event.inputs.environment }} up -d ${{ env.SERVICE_NAME }}
+            docker image prune -f
+            EOF
