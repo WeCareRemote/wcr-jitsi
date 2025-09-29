@@ -1,4 +1,4 @@
-name: "Jitsi Records Backend CI"
+name: "Jitsi Records Backend CI BUILD AND DEPLOY TO AWS"
 run-name: >
   ${{ format('Deploy Jitsi Records Backend to {0} environment', github.event.inputs.environment) }}
 on: 
@@ -24,7 +24,7 @@ env:
   SERVICE_NAME: jitsi_records_backend
   CONTAINER_NAME: jitsi-records-backend
   APP_PATH: /opt/greyt
-  ECR_URL: "${{ secrets.ACCOUNT_ID }}.dkr.ecr.${{ github.event.inputs.region }}.amazonaws.com"
+  ECR_URL: "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ github.event.inputs.region }}.amazonaws.com"
   CONTAINER_REGISTRY: "ecr-jitsi"
   DOCKERFILE_PATH: "jitsi_records_backend/docker/Dockerfile"
   BUILD_CONTEXT: "jitsi_records_backend"
@@ -41,8 +41,8 @@ jobs:
       - name: AWS login
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.SECRET_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ github.event.inputs.region }}
 
       - name: Docker login to ECR
@@ -85,14 +85,14 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          ssh-keyscan ${{ secrets.SSH_IP }} >> ~/.ssh/known_hosts
+          ssh-keyscan ${{ secrets.AWS_DEV_SSH_IP }} >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
       - name: Deploy service on server
         run: |
           eval $(ssh-agent -s)
-          echo "${{ secrets.SSH_KEY }}" | tr -d '\r' | ssh-add -
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} <<EOF
+          echo "${{ secrets.AWS_DEV_SSH_KEY }}" | tr -d '\r' | ssh-add -
+          ssh ${{ secrets.AWS_DEV_SSH_USER }}@${{ secrets.AWS_DEV_SSH_IP }} <<EOF
             set -e
             cd ${{ env.APP_PATH }}/jibri-stack
             aws ecr get-login-password --region ${{ github.event.inputs.region }} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}

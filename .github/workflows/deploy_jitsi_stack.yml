@@ -24,7 +24,7 @@ on:
 env:
   APP_PATH: /opt/greyt
   STACK_PATH: /opt/greyt/jibri-stack
-  ECR_URL: "${{ secrets.ACCOUNT_ID }}.dkr.ecr.${{ github.event.inputs.region }}.amazonaws.com"
+  ECR_URL: "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ github.event.inputs.region }}.amazonaws.com"
   CONTAINER_REGISTRY: "ecr-jitsi"
   SERVICE_NAME: jitsi_records_backend
 
@@ -45,21 +45,21 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          ssh-keyscan ${{ secrets.SSH_IP }} >> ~/.ssh/known_hosts
+          ssh-keyscan ${{ secrets.AWS_DEV_SSH_IP }} >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
       - name: Sync Jitsi files to server
         run: |
           eval $(ssh-agent -s)
-          echo "${{ secrets.SSH_KEY }}" | tr -d '\r' | ssh-add -
-          rsync -az ./jibri-stack ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:${{ env.APP_PATH }}/
-          rsync -az ./jitsi_records_backend ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:${{ env.APP_PATH }}/
+          echo "${{ secrets.AWS_DEV_SSH_KEY }}" | tr -d '\r' | ssh-add -
+          rsync -az ./jibri-stack ${{ secrets.AWS_DEV_SSH_USER }}@${{ secrets.AWS_DEV_SSH_IP }}:${{ env.APP_PATH }}/
+          rsync -az ./jitsi_records_backend ${{ secrets.AWS_DEV_SSH_USER }}@${{ secrets.AWS_DEV_SSH_IP }}:${{ env.APP_PATH }}/
 
       - name: Restart only Jitsi stack
         run: |
           eval $(ssh-agent -s)
-          echo "${{ secrets.SSH_KEY }}" | tr -d '\r' | ssh-add -
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} <<'EOF'
+          echo "${{ secrets.AWS_DEV_SSH_KEY }}" | tr -d '\r' | ssh-add -
+          ssh ${{ secrets.AWS_DEV_SSH_USER }}@${{ secrets.AWS_DEV_SSH_IP }} <<'EOF'
           set -e
           cd ${{ env.STACK_PATH }}
           aws ecr get-login-password --region ${{ github.event.inputs.region }} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}
