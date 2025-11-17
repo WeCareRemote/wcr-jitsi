@@ -53,6 +53,22 @@ jobs:
     environment: ${{ github.event.inputs.environment || 'development'}}
     steps:
       - uses: actions/checkout@v4
+      - name: AWS login
+        if: github.event.inputs.cloud == 'aws'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.SECRET_KEY }}
+          aws-region: eu-central-1
+      - name: ECR login
+        if: github.event.inputs.cloud == 'aws'
+        run: |
+          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin ${{ env.ECR_URL }}
+      - name: ACR login
+        if: github.event.inputs.cloud == 'azure'
+        run: |
+          az login --service-principal --username ${{ secrets.AZURE_SP_APP_ID }} --password ${{ secrets.AZURE_SP_PASSWORD }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+          az acr login --name ${{ secrets.AZURE_ACR_NAME }}
       - name: Build and push Docker image
         run: |
           docker build -f ${{ env.DOCKERFILE_PATH }} \
