@@ -2,7 +2,6 @@ version: '3.8'
 
 services:
   prosody:
-    profiles: ["dev"]
     image: jitsi/prosody:stable
     container_name: prosody
     restart: always
@@ -28,7 +27,6 @@ services:
       - ENABLE_GUESTS=1 
 
   jicofo:
-    profiles: ["dev"]
     image: jitsi/jicofo:stable
     container_name: jicofo
     restart: always
@@ -46,7 +44,6 @@ services:
       - ENABLE_GUESTS=1
 
   jvb:
-    profiles: ["dev"]
     image: jitsi/jvb:stable
     container_name: jvb
     restart: always
@@ -72,7 +69,6 @@ services:
       - TZ
 
   jibri:
-    profiles: ["dev"]
     image: jitsi/jibri:unstable
     container_name: jibri
     restart: always
@@ -110,7 +106,6 @@ services:
       - TZ
 
   jitsi_records_backend:
-    profiles: ["dev"]
     image: "${JITSI}"
     container_name: jitsi-records-backend
     restart: always
@@ -122,7 +117,6 @@ services:
       - jibri_recordings:/jibri_records
 
   web:
-    profiles: ["dev"]
     image: jitsi/web:stable
     container_name: jitsi-web
     restart: always

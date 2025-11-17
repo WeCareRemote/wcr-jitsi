@@ -154,7 +154,7 @@ jobs:
           else
             echo "Invalid cloud"; exit 1
           fi
-          docker compose --env-file ../.env --profile ${{ github.event.inputs.environment }} down
+          docker compose --env-file ../.env down
           sed -i "s|^JITSI=.*|JITSI=${REGISTRY}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.backend_tag || 'latest'}}|g" ../.env
           XMPP_DOMAIN='${{ secrets.XMPP_DOMAIN }}' \
           XMPP_AUTH_DOMAIN='${{ secrets.XMPP_AUTH_DOMAIN }}' \
@@ -189,5 +189,5 @@ jobs:
           DISPLAY='${{ secrets.DISPLAY }}' \
           TZ='${{ secrets.TZ }}' \
           JITSI="${REGISTRY}/${{ env.CONTAINER_REGISTRY }}:${{ github.event.inputs.backend_tag || 'latest'}}" \
-          docker compose --profile ${{ github.event.inputs.environment }} up -d --build
+          docker compose --env-file ../.env up -d --build
           EOF
